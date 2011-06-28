@@ -39,6 +39,10 @@ public:
 int initialize(AudioOutput output, int bufLength, string path, int options){
     return espeak_Initialize(output, bufLength, toStringz(path), options);
 }
+///Simple version with playback mode, default path, 5ms buffer and no special options
+int initialize(){
+    return espeak_Initialize(AudioOutput.AUDIO_OUTPUT_PLAYBACK, 500, null, 0);
+}
 
 void setSynthCallback(EspeakCallback synthCallBack){
     espeak_SetSynthCallback(synthCallBack);
@@ -60,6 +64,20 @@ EspeakError synth(wstring text, uint position, PositionType ptype, uint endPosit
     //Converts text, and automatically fills in size, and ensures wchar flag is set
     return espeak_Synth(cast(const void*)text, text.length*2, position, ptype, endPosition,
                   flags|espeakCHARS_WCHAR, uniqueID, userData);
+}
+
+///Simple version, reads all utf8 text with ssml and phonemes enables, and no callback data
+EspeakError synth(string text){
+    uint flags = espeakCHARS_UTF8 | espeakSSML | espeakPHONEMES;
+    return espeak_Synth(cast(const void*)text, text.length, 0, PositionType.POS_CHARACTER,
+                    0, flags, null, null);
+}
+
+///Simple version, reads all utf16 text with ssml and phonemes enables, and no callback data
+EspeakError synth(wstring text){
+    uint flags = espeakCHARS_WCHAR | espeakSSML | espeakPHONEMES;
+    return espeak_Synth(cast(const void*)text, text.length*2, 0, PositionType.POS_CHARACTER,
+                    0, flags, null, null);
 }
 
 EspeakError synthMark(string text, string mark, uint endPosition, uint flags,
