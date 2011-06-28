@@ -30,10 +30,13 @@ private import std.stdio;
 private import std.string;
 private import std.traits;
 
+AudioOutput defaultMode;
 version(Windows){
     import dspeak.cfuncsw;
+    defaultMode = AudioOutput.AUDIO_OUTPUT_SYNCH_PLAYBACK
 } else {
     import dspeak.cfuncs;
+    defaultMode = AudioOutput.AUDIO_OUTPUT_PLAYBACK
 }
 public import dspeak.types;
 
@@ -43,9 +46,9 @@ public:
 int initialize(AudioOutput output, int bufLength, string path, int options){
     return espeak_Initialize(output, bufLength, toStringz(path), options);
 }
-///Simple version with playback mode, default path, 5ms buffer and no special options
+///Simple version with playback mode, default path, 500ms buffer and no special options
 int initialize(){
-    return espeak_Initialize(AudioOutput.AUDIO_OUTPUT_PLAYBACK, 500, null, 0);
+    return espeak_Initialize(defaultMode, 500, null, 0);
 }
 
 void setSynthCallback(EspeakCallback synthCallBack){
@@ -73,7 +76,7 @@ EspeakError synth(wstring text, uint position, PositionType ptype, uint endPosit
 ///Simple version, reads all utf8 text with ssml and phonemes enables, and no callback data
 EspeakError synth(string text){
     uint flags = espeakCHARS_UTF8 | espeakSSML | espeakPHONEMES;
-    return espeak_Synth(cast(const void*)text, text.length, 0, PositionType.POS_CHARACTER,
+    return espeak_Synth(cast(const void*)toStringz(text), text.length, 0, PositionType.POS_CHARACTER,
                     0, flags, null, null);
 }
 
