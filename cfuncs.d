@@ -25,6 +25,10 @@ email: krendilboove@gmail.com
 
 module dspeak.cfuncs;
 
+version(Windows){
+    pragma(lib, "espeak.lib");
+}
+
 public import dspeak.types;
 
 import std.stdio;

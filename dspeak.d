@@ -32,6 +32,9 @@ private import std.traits;
 
 private import dspeak.cfuncs;
 public import dspeak.types;
+version(Windows){
+    private import dspeak.loaddll;
+}
 
 
 public:
