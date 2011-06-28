@@ -30,11 +30,12 @@ private import std.stdio;
 private import std.string;
 private import std.traits;
 
-private import dspeak.cfuncs;
-public import dspeak.types;
 version(Windows){
-    private import dspeak.loaddll;
+    import dspeak.cfuncsw;
+} else {
+    import dspeak.cfuncs;
 }
+public import dspeak.types;
 
 
 public:

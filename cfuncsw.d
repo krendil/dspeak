@@ -23,12 +23,15 @@ dspeak is Copyright (C) 2011 to David Osborne
 email: krendilboove@gmail.com
 */
 
-module dspeak.cfuncs;
+module dspeak.cfuncsw;
 
+
+import dspeak.loaddll;
 public import dspeak.types;
 
 import std.stdio;
 
+extern(C){
 __gshared:
 
 /** Must be called before any synthesis functions are called.
@@ -43,8 +46,7 @@ __gshared:
 
    Returns: sample rate in Hz, or -1 (EE_INTERNAL_ERROR).
 */
-extern(C) int espeak_Initialize(espeak_AUDIO_OUTPUT output, int buflength, const char* path, 
-                                    int options);
+ int function(espeak_AUDIO_OUTPUT output, int buflength, const char* path, int options) espeak_Initialize;
 
          /********************/
          /*    Synthesis     */
@@ -73,7 +75,7 @@ int SynthCallback(short *wav, int numsamples, espeak_EVENT *events);
 
    Callback returns: 0=continue synthesis,  1=abort synthesis.
 */
-extern(C) void espeak_SetSynthCallback(t_espeak_callback SynthCallback);
+ void function (t_espeak_callback SynthCallback) espeak_SetSynthCallback;
 
 /** This function may be called before synthesis functions are used, in order to deal with
    <audio> tags.  It specifies a callback function which is called when an <audio> element is
@@ -94,7 +96,7 @@ int UriCallback(int type, const char *uri, const char *base);
            0=place a PLAY event in the event list at the point where the <audio> element
              occurs.  The calling program can then play the sound at that point.
 */
-extern(C) void espeak_SetUriCallback(int function(int, const char*, const char*) UriCallback);
+ void function (int function(int, const char*, const char*) UriCallback) espeak_SetUriCallback;
 
 /** Synthesize speech for the specified text.  The speech sound data is passed to the calling
    program in buffers by means of the callback function specified by espeak_SetSynthCallback(). The command is asynchronous: it is internally buffered and returns as soon as possible. If espeak_Initialize was previously called with AUDIO_OUTPUT_PLAYBACK as argument, the sound data are played by eSpeak.
@@ -140,14 +142,14 @@ extern(C) void espeak_SetUriCallback(int function(int, const char*, const char*)
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Synth(const void* text,
+ espeak_ERROR function(const void* text,
 	size_t size,
 	uint position,
 	espeak_POSITION_TYPE position_type,
 	uint end_position,
 	uint flags,
 	uint* unique_identifier,
-	void* user_data);
+	void* user_data) espeak_Synth;
     
 /** Synthesize speech for the specified text.  Similar to espeak_Synth() but the start position is
    specified by the name of a <mark> element in the text.
@@ -162,13 +164,13 @@ extern(C) espeak_ERROR espeak_Synth(const void* text,
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Synth_Mark(const void* text,
+ espeak_ERROR function(const void* text,
 	size_t size,
 	const char* index_mark,
 	uint end_position,
 	uint flags,
 	uint* unique_identifier,
-	void* user_data);
+	void* user_data) espeak_Synth_Mark;
     
 /** Speak the name of a keyboard key.
    If key_name is a single character, it speaks the name of the character.
@@ -179,7 +181,7 @@ extern(C) espeak_ERROR espeak_Synth_Mark(const void* text,
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Key(const char* key_name);
+ espeak_ERROR function(const char* key_name) espeak_Key;
 
 /** Speak the name of the given character 
 
@@ -188,7 +190,7 @@ extern(C) espeak_ERROR espeak_Key(const char* key_name);
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Char(wchar character);
+ espeak_ERROR function(wchar character) espeak_Char;
 
 
          /***********************/
@@ -227,12 +229,12 @@ extern(C) espeak_ERROR espeak_Char(wchar character);
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_SetParameter(espeak_PARAMETER parameter, int value, int relative);
+ espeak_ERROR function(espeak_PARAMETER parameter, int value, int relative) espeak_SetParameter;
 
 /** current=0  Returns the default value of the specified parameter.
    current=1  Returns the current value of the specified parameter, as set by SetParameter()
 */
-extern(C) int espeak_GetParameter(espeak_PARAMETER parameter, int current);
+ int function(espeak_PARAMETER parameter, int current) espeak_GetParameter;
 
 /** Specified a list of punctuation characters whose names are to be spoken when the
    value of the Punctuation parameter is set to "some".
@@ -244,7 +246,7 @@ extern(C) int espeak_GetParameter(espeak_PARAMETER parameter, int current);
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_SetPunctuationList(const wchar* punctlist);
+ espeak_ERROR function(const wchar* punctlist)espeak_SetPunctuationList;
 
 
 /** Controls the output of phoneme symbols for the text
@@ -255,7 +257,7 @@ extern(C) espeak_ERROR espeak_SetPunctuationList(const wchar* punctlist);
 
    stream   output stream for the phoneme symbols (and trace).  If stream=NULL then it uses stdout.
 */
-extern(C) void espeak_SetPhonemeTrace(int value, FILE* stream);
+ void function(int value, FILE* stream)espeak_SetPhonemeTrace;
 
 /** Compile pronunciation dictionary for a language which corresponds to the currently
    selected voice.  The required voice should be selected before calling this function.
@@ -267,7 +269,7 @@ extern(C) void espeak_SetPhonemeTrace(int value, FILE* stream);
    flags:  Bit 0: include source line information for debug purposes (This is displayed with the
           -X command line option).
 */
-extern(C) void espeak_CompileDictionary(const char* path, FILE* log, int flags);
+ void function(const char* path, FILE* log, int flags)espeak_CompileDictionary;
 
 
         /***********************/
@@ -281,7 +283,7 @@ extern(C) void espeak_CompileDictionary(const char* path, FILE* log, int flags);
    If voice spec is given, then only the voices which are compatible with the voice_spec
    are listed, and they are listed in preference order.
 */
-extern(C) const(espeak_VOICE)** espeak_ListVoices(espeak_VOICE* voice_spec);
+ const(espeak_VOICE)** function(espeak_VOICE* voice_spec)espeak_ListVoices;
 
 /** Searches for a voice with a matching "name" field.  Language is not considered.
    "name" is a UTF8 string.
@@ -291,7 +293,7 @@ extern(C) const(espeak_VOICE)** espeak_ListVoices(espeak_VOICE* voice_spec);
              you may try after a while to call the function again.
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_SetVoiceByName(const char* name);
+ espeak_ERROR function(const char* name)espeak_SetVoiceByName;
 
 /** An espeak_VOICE structure is used to pass criteria to select a voice.  Any of the following
    fields may be set:
@@ -308,13 +310,13 @@ extern(C) espeak_ERROR espeak_SetVoiceByName(const char* name);
             that list and choose a voice.
             variant=0 takes the top voice (i.e. best match). variant=1 takes the next voice, etc
 */
-extern(C) espeak_ERROR espeak_SetVoiceByProperties(espeak_VOICE* voice_spec);
+ espeak_ERROR function(espeak_VOICE* voice_spec) espeak_SetVoiceByProperties;
 
 
 /** Returns the espeak_VOICE data for the currently selected voice.
    This is not affected by temporary voice changes caused by SSML elements such as <voice> and <s>
 */
-extern(C) espeak_VOICE* espeak_GetCurrentVoice();
+ espeak_VOICE* function() espeak_GetCurrentVoice;
 
 
 /** Stop immediately synthesis and audio output of the current text. When this
@@ -324,27 +326,29 @@ extern(C) espeak_VOICE* espeak_GetCurrentVoice();
    Return: EE_OK: operation achieved 
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Cancel();
+ espeak_ERROR function() espeak_Cancel;
 
 /** Returns 1 if audio is played, 0 otherwise.
 */
-extern(C) int espeak_IsPlaying();
+ int function() espeak_IsPlaying;
 
 
 /** This function returns when all data have been spoken.
    Return: EE_OK: operation achieved 
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Synchronize();
+ espeak_ERROR function() espeak_Synchronize;
 
 
 /** last function to be called.
    Return: EE_OK: operation achieved 
 	   EE_INTERNAL_ERROR.
 */
-extern(C) espeak_ERROR espeak_Terminate();
+ espeak_ERROR function() espeak_Terminate;
 
 /** Returns the version number string.
    path_data  returns the path to espeak_data
 */
-extern(C) const(char*) espeak_Info(const(char)** path_data);
+ const(char*) function(const(char)** path_data) espeak_Info;
+ 
+}
